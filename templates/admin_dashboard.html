@@ -3,8 +3,10 @@
 <div class="dashboard-container">
     <div class="dashboard-header">
         <h1>Admin Dashboard</h1>
+        <a href="{{ url_for('admin.view_users') }}" class="btn btn-outline">View All Users</a>
         <a href="{{ url_for('admin.add_lot_page') }}" class="btn btn-red">Create New Parking Lot</a>
     </div>
+
 
     <hr>
 
@@ -20,7 +22,14 @@
                         <span>Capacity: {{ lot.capacity }} spots</span>
                         <span>Price: ₹{{ "%.2f"|format(lot.price_per_hour) }}/hr</span>
                     </div>
-                    <a href="#" class="details-link">View Details &raquo;</a>
+                    <a href="{{ url_for('admin.lot_details', lot_id=lot.id) }}" class="details-link">View Details &raquo;</a>
+
+                     <div class="lot-actions">
+                     <a href="{{ url_for('admin.edit_lot', lot_id=lot.id) }}" class="btn-action btn-edit">Edit</a>
+                     <form method="POST" action="{{ url_for('admin.delete_lot', lot_id=lot.id) }}" style="display: inline;" onsubmit="return confirm('Are you sure you want to delete this lot?');">
+                     <button type="submit" class="btn-action btn-delete">Delete</button>
+        </form>
+    </div>
                 </div>
             {% endfor %}
         </div>

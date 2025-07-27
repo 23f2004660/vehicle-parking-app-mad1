@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from models.database import db, ParkingLot, ParkingSpot
+from models.database import User, db, ParkingLot, ParkingSpot
 
 # Create a blueprint for admin routes
 admin_bp = Blueprint('admin', __name__)
@@ -51,3 +51,100 @@ def add_lot_page():
 
     # For a GET request, just show the form
     return render_template('add_lot.html')
+
+@admin_bp.route('/admin/lot/<int:lot_id>')
+def lot_details(lot_id):
+    if not session.get('is_admin'):
+        flash('You must be an admin to view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # Find the specific lot by its ID. If not found, it will return a 404 error.
+    lot = ParkingLot.query.get_or_404(lot_id)
+
+    # The lot's spots are automatically available through the relationship
+    # so we can just pass the lot object to the template.
+    return render_template('lot_details.html', lot=lot)
+
+@admin_bp.route('/admin/users')
+def view_users():
+    if not session.get('is_admin'):
+        flash('You must be an admin to view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # Query all users who are NOT admins
+    users = User.query.filter_by(is_admin=False).all()
+    
+    return render_template('view_users.html', users=users)
+
+# In routes/admin_routes.py
+
+@admin_bp.route('/admin/lot/delete/<int:lot_id>', methods=['POST'])
+def delete_lot(lot_id):
+    if not session.get('is_admin'):
+        return redirect(url_for('auth.login'))
+
+    lot_to_delete = ParkingLot.query.get_or_404(lot_id)
+
+    # Check if any spot in the lot is occupied
+    occupied_spots = any(spot.status == 'O' for spot in lot_to_delete.spots)
+    if occupied_spots:
+        flash('Cannot delete a lot with occupied spots. Please wait until it is empty.', 'danger')
+        return redirect(url_for('admin.admin_dashboard'))
+
+    # If all spots are available, proceed with deletion
+    db.session.delete(lot_to_delete)
+    db.session.commit()
+    flash(f'Parking lot "{lot_to_delete.name}" has been deleted.', 'success')
+    return redirect(url_for('admin.admin_dashboard'))
+
+# In routes/admin_routes.py
+
+# In routes/admin_routes.py
+
+@admin_bp.route('/admin/lot/edit/<int:lot_id>', methods=['GET', 'POST'])
+def edit_lot(lot_id):
+    if not session.get('is_admin'):
+        return redirect(url_for('auth.login'))
+
+    lot_to_edit = ParkingLot.query.get_or_404(lot_id)
+
+    if request.method == 'POST':
+        # Update the simple fields first
+        lot_to_edit.name = request.form['name']
+        lot_to_edit.address = request.form['address']
+        lot_to_edit.pincode = request.form['pincode']
+        lot_to_edit.price_per_hour = float(request.form['price_per_hour'])
+
+        # --- Logic for Changing Capacity ---
+        new_capacity = int(request.form['capacity'])
+        current_capacity = lot_to_edit.capacity
+
+        if new_capacity > current_capacity:
+            # INCREASE: Add new spots
+            for i in range(current_capacity + 1, new_capacity + 1):
+                new_spot = ParkingSpot(spot_number=i, status='A')
+                lot_to_edit.spots.append(new_spot)
+            lot_to_edit.capacity = new_capacity
+
+        elif new_capacity < current_capacity:
+            # DECREASE: Remove spots, but only if they are available
+            spots_to_remove_count = current_capacity - new_capacity
+            
+            # Find available spots to delete, starting from the highest number
+            available_spots_to_delete = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').order_by(ParkingSpot.spot_number.desc()).limit(spots_to_remove_count).all()
+
+            if len(available_spots_to_delete) < spots_to_remove_count:
+                # Not enough available spots to delete
+                flash('Cannot decrease capacity by that much, too many spots are occupied.', 'danger')
+                return redirect(url_for('admin.edit_lot', lot_id=lot_id))
+            else:
+                # Proceed with deletion
+                for spot in available_spots_to_delete:
+                    db.session.delete(spot)
+                lot_to_edit.capacity = new_capacity
+        
+        db.session.commit()
+        flash(f'Successfully updated parking lot "{lot_to_edit.name}".', 'success')
+        return redirect(url_for('admin.admin_dashboard'))
+
+    return render_template('edit_lot.html', lot=lot_to_edit)

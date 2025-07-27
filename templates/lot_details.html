@@ -1,0 +1,30 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <div>
+            <h1>{{ lot.name }}</h1>
+            <p class="lot-meta">{{ lot.address }}, {{ lot.pincode }}</p>
+        </div>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline">&laquo; Back to Dashboard</a>
+    </div>
+
+    <hr>
+
+    <h2>Parking Spot Status</h2>
+    <div class="spot-grid">
+        {% for spot in lot.spots %}
+            <div class="spot-card status-{{ spot.status }}">
+                <span class="spot-number">Spot #{{ spot.spot_number }}</span>
+                <span class="spot-status">
+                    {% if spot.status == 'A' %}
+                        Available
+                    {% else %}
+                        Occupied
+                    {% endif %}
+                </span>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

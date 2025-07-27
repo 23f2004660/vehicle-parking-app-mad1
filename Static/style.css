@@ -234,3 +234,100 @@ hr {
     border-radius: 0.5rem;
     color: #6c757d;
 }
+
+/* --- Lot Details Page Styles --- */
+.spot-grid {
+    display: grid;
+    /* Create a responsive grid that fits as many spots as possible */
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 1rem;
+}
+
+.spot-card {
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 1rem;
+    text-align: center;
+    font-weight: 500;
+}
+
+.spot-card .spot-number {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.spot-card .spot-status {
+    font-size: 0.9rem;
+}
+
+/* --- Status-Specific Colors --- */
+
+/* Green for Available */
+.spot-card.status-A {
+    background-color: #e6f7ec;
+    border-left: 5px solid #28a745;
+    color: #155724;
+}
+
+/* Red for Occupied */
+.spot-card.status-O {
+    background-color: #f8d7da;
+    border-left: 5px solid #c82333;
+    color: #721c24;
+}
+
+/* --- Data Table Styles for Users --- */
+.data-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+    border-radius: 0.5rem;
+    overflow: hidden; /* Keeps rounded corners on the table */
+}
+
+.data-table th, .data-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #dee2e6;
+}
+
+.data-table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+    color: #495057;
+}
+
+.data-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.data-table tbody tr:hover {
+    background-color: #f1f3f5;
+}
+
+/* styles for lot actions */
+.lot-actions {
+    margin-top: 1rem;
+    text-align: right;
+}
+.btn-action {
+    display: inline-block;
+    padding: 0.4rem 0.8rem;
+    font-size: 0.8rem;
+    font-weight: 500;
+    border-radius: 0.25rem;
+    text-decoration: none;
+    border: none;
+    cursor: pointer;
+}
+.btn-edit {
+    background-color: #ffc107;
+    color: #212529;
+}
+.btn-delete {
+    background-color: #dc3545;
+    color: #fff;
+}
