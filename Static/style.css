@@ -1,0 +1,160 @@
+/* General Setup */
+html {
+    box-sizing: border-box;
+}
+*, *:before, *:after {
+    box-sizing: inherit;
+}
+body {
+    margin: 0;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    background-color: #f0f2f5; /* Light gray background */
+    color: #212529; /* Near-black text */
+    line-height: 1.5;
+}
+
+/* Layout Container */
+.main-container {
+    max-width: 700px;
+    margin: 0 auto; /* Centers the content block */
+    padding: 2rem;
+}
+
+/* Welcome Page Specifics */
+.welcome-content {
+    text-align: center;
+    padding-top: 10vh; /* Pushes content down from the top */
+}
+
+.welcome-content h1 {
+    font-size: 3rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+}
+
+.welcome-content .subtitle {
+    font-size: 1.25rem;
+    color: #6c757d; /* Softer gray for the subtitle */
+    margin-bottom: 3rem;
+}
+
+/* Custom Card Styling */
+.welcome-card {
+    background-color: #ffffff;
+    border: 1px solid #dee2e6;
+    border-radius: 0.5rem;
+    padding: 2rem;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05); /* Subtle shadow */
+}
+
+.welcome-card h2 {
+    margin-top: 0;
+    font-size: 1.5rem;
+    font-weight: 600;
+}
+
+/* Custom Button Styling from Scratch */
+.btn {
+    display: inline-block;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid transparent;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 0.25rem;
+    text-decoration: none; /* Removes underline from links */
+    transition: all 0.2s ease-in-out; /* Smooth transition for hover effects */
+}
+
+.btn-red {
+    color: #fff;
+    background-color: #c82333; /* Strong red */
+    border-color: #c82333;
+}
+
+.btn-red:hover {
+    background-color: #a21b29; /* Darker red */
+}
+
+.btn-outline {
+    color: #343a40; /* Dark gray text */
+    border-color: #343a40;
+    background-color: transparent;
+}
+
+.btn-outline:hover {
+    color: #fff;
+    background-color: #343a40; /* Dark gray background */
+}
+
+
+.form-container {
+    padding-top: 5vh;
+}
+
+.form-card {
+    background-color: #fff;
+    padding: 2rem 2.5rem;
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    border: 1px solid #dee2e6;
+}
+
+.form-card h2 {
+    text-align: center;
+    margin-top: 0;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+
+.form-group input {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ccc;
+    border-radius: 0.25rem;
+    font-size: 1rem;
+}
+
+.form-card .btn {
+    width: 100%;
+    margin-top: 1rem;
+    padding: 0.8rem;
+}
+
+.form-footer {
+    text-align: center;
+    margin-top: 1.5rem;
+    font-size: 0.9rem;
+}
+
+
+.flash-danger {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    color: #721c24;
+    background-color: #f8d7da;
+    border-color: #f5c6cb;
+}
+.flash-success {
+    padding: 1rem;
+    margin-bottom: 1rem;
+    border: 1px solid transparent;
+    border-radius: .25rem;
+    color: #155724;
+    background-color: #d4edda;
+    border-color: #c3e6cb;
+}
