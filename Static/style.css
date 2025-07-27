@@ -1,4 +1,3 @@
-/* General Setup */
 html {
     box-sizing: border-box;
 }
@@ -89,7 +88,7 @@ body {
     background-color: #343a40; /* Dark gray background */
 }
 
-
+/* styles for forms */
 .form-container {
     padding-top: 5vh;
 }
@@ -157,4 +156,81 @@ body {
     color: #155724;
     background-color: #d4edda;
     border-color: #c3e6cb;
+}
+/* styles for dashboard */
+.dashboard-container {
+    max-width: 900px; /* A wider container for dashboard pages */
+}
+
+.dashboard-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+}
+
+.dashboard-header h1 {
+    margin: 0;
+    font-size: 2.25rem;
+}
+
+hr {
+    margin: 2rem 0;
+    border: 0;
+    border-top: 1px solid #dee2e6;
+}
+
+.lot-list {
+    display: grid;
+    gap: 1.5rem; /* Space between the lot cards */
+}
+
+.lot-card {
+    background-color: #fff;
+    padding: 1.5rem;
+    border-radius: 0.5rem;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+}
+
+.lot-card h3 {
+    margin-top: 0;
+    margin-bottom: 0.5rem;
+    color: #343a40;
+}
+
+.lot-card .lot-meta {
+    color: #6c757d;
+    margin-bottom: 1rem;
+}
+
+.lot-card .lot-details {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.9rem;
+    color: #495057;
+    border-top: 1px solid #e9ecef;
+    padding-top: 1rem;
+    margin-top: 1rem;
+}
+
+.lot-card .details-link {
+    display: inline-block;
+    margin-top: 1rem;
+    font-weight: 500;
+    color: #c82333;
+    text-decoration: none;
+}
+
+.lot-card .details-link:hover {
+    text-decoration: underline;
+}
+
+.card-placeholder {
+    background-color: #f8f9fa;
+    padding: 3rem;
+    text-align: center;
+    border: 2px dashed #dee2e6;
+    border-radius: 0.5rem;
+    color: #6c757d;
 }

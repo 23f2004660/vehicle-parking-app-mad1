@@ -1,0 +1,34 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Admin Dashboard</h1>
+        <a href="{{ url_for('admin.add_lot_page') }}" class="btn btn-red">Create New Parking Lot</a>
+    </div>
+
+    <hr>
+
+    <h2>Existing Parking Lots</h2>
+
+    {% if lots %}
+        <div class="lot-list">
+            {% for lot in lots %}
+                <div class="lot-card">
+                    <h3>{{ lot.name }}</h3>
+                    <p class="lot-meta">{{ lot.address }}, {{ lot.pincode }}</p>
+                    <div class="lot-details">
+                        <span>Capacity: {{ lot.capacity }} spots</span>
+                        <span>Price: ₹{{ "%.2f"|format(lot.price_per_hour) }}/hr</span>
+                    </div>
+                    <a href="#" class="details-link">View Details &raquo;</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="card-placeholder">
+            <p>No parking lots have been created yet. Get started by creating one!</p>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
