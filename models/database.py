@@ -19,7 +19,7 @@ class User(db.Model):
     address = db.Column(db.String(100), nullable=False)
     pincode = db.Column(db.String(10), nullable=False)
 
-    reservations = db.relationship('Reservation', backref='user', lazy=True, cascade="all, delete-orphan")
+    reservations = db.relationship('Reservation', backref='spot', lazy=True, cascade="all, delete-orphan")
 
     def set_password(self, password):
         self.password_hash = generate_password_hash(password)
@@ -55,7 +55,7 @@ class ParkingSpot(db.Model):
     spot_number = db.Column(db.Integer, nullable=False)
     status = db.Column(db.String(1), default='A', nullable=False) # 'A' for Available, 'O' for Occupied, 'R' for Reserved
 
-    reservation = db.relationship('Reservation', backref='spot', uselist=False, cascade="all, delete-orphan")
+    reservations = db.relationship('Reservation', backref='spot', lazy=True, cascade="all, delete-orphan")
 
 class Reservation(db.Model):
     __tablename__ = 'reservation'

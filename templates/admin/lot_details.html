@@ -14,18 +14,25 @@
     <h2>Parking Spot Status</h2>
     <div class="spot-grid">
         {% for spot in lot.spots %}
-            <div class="spot-card status-{{ spot.status }}">
-                <span class="spot-number">Spot #{{ spot.spot_number }}</span>
-                <span class="spot-status">
-                    {% if spot.status == 'A' %}
-                        Available
-                    {% elif spot.status == 'O' %}
-                        Occupied
-                    {% else %}
-                        Reserved
-                    {% endif %}
-                </span>
-            </div>
+        <div class="spot-card status-{{ spot.status }}">
+            <span class="spot-number">Spot #{{ spot.spot_number }}</span>
+            <span class="spot-status">
+                {% if spot.status == 'A' %}
+                    Available
+                {% else %}
+                    
+                    {% for res in spot.reservations %}
+                        {% if res.end_time is none %}
+                            {% if spot.status == 'R' %}
+                                Reserved by: <br><strong>{{ res.user.full_name }}</strong>
+                            {% elif spot.status == 'O' %}
+                                Occupied by: <br><strong>{{ res.user.full_name }}</strong>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                {% endif %}
+            </span>
+        </div>
         {% endfor %}
     </div>
 </div>

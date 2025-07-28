@@ -2,6 +2,7 @@ from flask import Blueprint, render_template, request, redirect, url_for, flash,
 from models.database import User, db, ParkingLot, ParkingSpot, Reservation
 from sqlalchemy import or_
 from sqlalchemy import func
+from sqlalchemy.orm import joinedload
 # Create a blueprint for admin routes
 admin_bp = Blueprint('admin', __name__)
 
@@ -59,11 +60,14 @@ def lot_details(lot_id):
         flash('You must be an admin to view this page.', 'danger')
         return redirect(url_for('auth.login'))
 
-    # Find the specific lot by its ID. If not found, it will return a 404 error.
-    lot = ParkingLot.query.get_or_404(lot_id)
+    # This new query uses "eager loading" to reliably fetch all related data
+    lot = ParkingLot.query.options(
+        joinedload(ParkingLot.spots).subqueryload(ParkingSpot.reservations)
+    ).get(lot_id)
+    
+    if not lot:
+        return "Lot not found", 404
 
-    # The lot's spots are automatically available through the relationship
-    # so we can just pass the lot object to the template.
     return render_template('admin/lot_details.html', lot=lot)
 
 @admin_bp.route('/admin/users')
