@@ -1,6 +1,7 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
-from models.database import User, db, ParkingLot, ParkingSpot
+from models.database import User, db, ParkingLot, ParkingSpot, Reservation
 from sqlalchemy import or_
+from sqlalchemy import func
 # Create a blueprint for admin routes
 admin_bp = Blueprint('admin', __name__)
 
@@ -183,3 +184,40 @@ def search():
                            query=query, 
                            lots=found_lots, 
                            users=found_users)
+
+
+@admin_bp.route('/admin/summary')
+def summary_page():
+    if not session.get('is_admin'):
+        flash('You must be an admin to view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # --- Data for Parking Lots Summary Tab ---
+    lots = ParkingLot.query.order_by(ParkingLot.name).all()
+    lot_names = [lot.name for lot in lots]
+    lot_capacities = [lot.capacity for lot in lots]
+
+    available_spots = ParkingSpot.query.filter_by(status='A').count()
+    occupied_spots = ParkingSpot.query.filter_by(status='O').count()
+    reserved_spots = ParkingSpot.query.filter_by(status='R').count()
+
+    # --- Data for Revenue Summary Tab ---
+    revenue_per_lot = []
+    for lot in lots:
+        # Sum the total_cost for all completed reservations for this specific lot
+        total = db.session.query(func.sum(Reservation.total_cost)).join(ParkingSpot).filter(
+            ParkingSpot.lot_id == lot.id,
+            Reservation.end_time.is_not(None)
+        ).scalar() or 0.0
+        revenue_per_lot.append(total)
+    
+    total_revenue = sum(revenue_per_lot)
+
+    return render_template('admin/summary_charts.html',
+                           lot_names=lot_names,
+                           lot_capacities=lot_capacities,
+                           available_spots=available_spots,
+                           occupied_spots=occupied_spots,
+                           reserved_spots=reserved_spots,
+                           revenue_per_lot=revenue_per_lot,
+                           total_revenue=total_revenue)
