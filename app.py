@@ -7,6 +7,7 @@ from routes.user_routes import user_bp
 from zoneinfo import ZoneInfo
 from datetime import datetime
 
+
 app = Flask(__name__)
 
 # --- App Configuration ---
