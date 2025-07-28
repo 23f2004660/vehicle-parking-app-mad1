@@ -7,6 +7,13 @@
         <a href="{{ url_for('admin.add_lot_page') }}" class="btn btn-red">Create New Parking Lot</a>
     </div>
 
+    {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="flash-{{ category }}">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
 
     <hr>
 
