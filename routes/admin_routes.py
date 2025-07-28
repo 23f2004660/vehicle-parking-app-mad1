@@ -225,3 +225,18 @@ def summary_page():
                            reserved_spots=reserved_spots,
                            revenue_per_lot=revenue_per_lot,
                            total_revenue=total_revenue)
+
+# In routes/admin_routes.py
+
+@admin_bp.route('/admin/records')
+def all_records():
+    if not session.get('is_admin'):
+        flash('You must be an admin to view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # Fetch all reservations that have an end_time, newest first
+    all_reservations = Reservation.query.filter(
+        Reservation.end_time.is_not(None)
+    ).order_by(Reservation.end_time.desc()).all()
+    
+    return render_template('admin/all_records.html', reservations=all_reservations)

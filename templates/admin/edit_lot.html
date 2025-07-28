@@ -1,6 +1,7 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="form-container">
+    <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline">&laquo; Back to Dashboard</a>
     <form method="POST" action="{{ url_for('admin.edit_lot', lot_id=lot.id) }}" class="form-card">
         <h2>Edit Parking Lot: {{ lot.name }}</h2>
         <div class="form-group">

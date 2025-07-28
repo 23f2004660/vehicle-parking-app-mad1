@@ -1,12 +1,14 @@
 {% extends "layout.html" %}
 {% block content %}
 <div class="dashboard-container">
-    <div class="dashboard-header">
-        <h1>Admin Dashboard</h1>
-        <a href="{{ url_for('admin.view_users') }}" class="btn btn-outline">View All Users</a>
-        <a href="{{ url_for('admin.add_lot_page') }}" class="btn btn-red">Create New Parking Lot</a>
-        <a href="{{ url_for('admin.summary_page') }}" class="btn btn-outline">System Summary</a>
+    <div class="header-actions">
+        <a href="{{ url_for('admin.summary_page') }}" class="btn btn-outline btn-sm">Summary</a>
+        <a href="{{ url_for('admin.all_records') }}" class="btn btn-outline btn-sm">All Records</a>
+        <a href="{{ url_for('admin.view_users') }}" class="btn btn-outline btn-sm">All Users</a>
+        <a href="{{ url_for('admin.add_lot_page') }}" class="btn btn-red btn-sm">Create New Lot</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline btn-sm">Logout</a>
     </div>
+    <hr>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}

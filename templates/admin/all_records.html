@@ -1,0 +1,41 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>All Parking Records</h1>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline">&laquo; Back to Dashboard</a>
+    </div>
+    <hr>
+
+    {% if reservations %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>User</th>
+                <th>Lot Name</th>
+                <th>Spot #</th>
+                <th>Parked At (IST)</th>
+                <th>Released At (IST)</th>
+                <th>Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in reservations %}
+            <tr>
+                <td>{{ res.user.full_name }}</td>
+                <td>{{ res.spot.lot.name }}</td>
+                <td>{{ res.spot.spot_number }}</td>
+                <td>{{ (res.start_time | to_ist).strftime('%d-%b %I:%M %p') }}</td>
+                <td>{{ (res.end_time | to_ist).strftime('%d-%b %I:%M %p') }}</td>
+                <td>₹{{ "%.2f"|format(res.total_cost) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="card-placeholder">
+        <p>There are no completed parking records yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
