@@ -278,6 +278,13 @@ hr {
     color: #721c24;
 }
 
+/* Yellow for Reserved */
+.spot-card.status-R {
+    background-color: #fff8e1;
+    border-left: 5px solid #ffc107;
+    color: #856404;
+}
+
 /* --- Data Table Styles for Users --- */
 .data-table {
     width: 100%;
@@ -330,4 +337,21 @@ hr {
 .btn-delete {
     background-color: #dc3545;
     color: #fff;
+}
+
+/* styles for user dashboard */
+
+.lot-card.active-session {
+    background-color: #e2f3ff;
+    border-left: 5px solid #007bff;
+}
+
+.btn-book {
+    background-color: #28a745; /* Green */
+    color: #fff;
+}
+/* for parking button */
+.btn-sm {
+    padding: 0.23rem 0.70rem;
+    font-size: 0.85rem;
 }

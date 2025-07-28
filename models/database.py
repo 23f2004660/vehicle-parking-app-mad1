@@ -53,15 +53,15 @@ class ParkingSpot(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     lot_id = db.Column(db.Integer, db.ForeignKey('parking_lot.id'), nullable=False)
     spot_number = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(1), default='A', nullable=False) # 'A' for Available, 'O' for Occupied
+    status = db.Column(db.String(1), default='A', nullable=False) # 'A' for Available, 'O' for Occupied, 'R' for Reserved
 
     reservation = db.relationship('Reservation', backref='spot', uselist=False, cascade="all, delete-orphan")
 
 class Reservation(db.Model):
     __tablename__ = 'reservation'
     id = db.Column(db.Integer, primary_key=True)
-    spot_id = db.Column(db.Integer, db.ForeignKey('parking_spot.id'), unique=True, nullable=False)
+    spot_id = db.Column(db.Integer, db.ForeignKey('parking_spot.id'), nullable=False)
     user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
-    start_time = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    start_time = db.Column(db.DateTime, nullable=True)
     end_time = db.Column(db.DateTime, nullable=True) 
     total_cost = db.Column(db.Float, nullable=True)

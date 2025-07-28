@@ -1,4 +1,9 @@
 from flask import Blueprint, render_template, session, redirect, url_for, flash
+from models.database import db, User, ParkingLot, ParkingSpot, Reservation
+from datetime import datetime
+import math
+
+
 
 user_bp = Blueprint('user', __name__)
 
@@ -7,5 +12,105 @@ def user_dashboard():
     if 'user_id' not in session:
         flash('You must be logged in to view this page.', 'danger')
         return redirect(url_for('auth.login'))
+    
+    # Let's print the session user ID to be sure it's correct
+    print(f"--- DEBUG: Checking for reservations for user_id: {session.get('user_id')} ---")
 
-    return f"<h1>Welcome, User! Your email is {session.get('user_email')}</h1>" # Placeholder
+    active_reservations = Reservation.query.filter(
+        Reservation.user_id == session['user_id'], 
+        Reservation.end_time.is_(None)
+    ).all()
+    
+    # Let's print what the database query found
+    print(f"--- DEBUG: Query found these reservations: {active_reservations} ---")
+
+    lots = ParkingLot.query.all()
+    
+    return render_template('user/user_dashboard.html', lots=lots, active_reservations=active_reservations)
+
+@user_bp.route('/user/book/<int:lot_id>', methods=['POST'])
+def book_spot(lot_id):
+
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    available_spot = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').first()
+
+    if available_spot:
+        # Change spot status to Reserved
+        available_spot.status = 'R'
+        
+        # Create reservation record WITHOUT a start_time
+        new_reservation = Reservation(
+            user_id=session['user_id'],
+            spot_id=available_spot.id
+        )
+        db.session.add(new_reservation)
+        db.session.commit()
+        flash(f'Successfully reserved Spot #{available_spot.spot_number}!', 'success')
+    else:
+        flash('Sorry, no spots are available in this lot.', 'danger')
+
+    return redirect(url_for('user.user_dashboard'))
+
+@user_bp.route('/user/occupy/<int:reservation_id>', methods=['POST'])
+def occupy_spot(reservation_id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    reservation = Reservation.query.get_or_404(reservation_id)
+    if reservation.user_id != session['user_id']:
+        return redirect(url_for('user.user_dashboard'))
+
+    # Set the start time and change status to Occupied
+    reservation.start_time = datetime.utcnow()
+    reservation.spot.status = 'O'
+    db.session.commit()
+
+    flash(f'Parking session started for Spot #{reservation.spot.spot_number}.', 'success')
+    return redirect(url_for('user.user_dashboard'))
+
+@user_bp.route('/user/release/<int:reservation_id>', methods=['POST'])
+def release_spot(reservation_id):
+    if 'user_id' not in session:
+        return redirect(url_for('auth.login'))
+
+    reservation = Reservation.query.get_or_404(reservation_id)
+    if reservation.user_id != session['user_id'] or reservation.start_time is None:
+        return redirect(url_for('user.user_dashboard'))
+
+    # --- New Tiered Calculation Logic ---
+    reservation.end_time = datetime.utcnow()
+    duration_minutes = (reservation.end_time - reservation.start_time).total_seconds() / 60
+    
+    # If parked for 30 mins or less, charge for 30 mins.
+    if duration_minutes <= 30:
+        blocks_to_charge = 1
+    # Otherwise, round up to the next 30-min block
+    else:
+        blocks_to_charge = math.ceil(duration_minutes / 30)
+
+    hours_to_charge = blocks_to_charge * 0.5
+    price_per_hour = reservation.spot.lot.price_per_hour
+    total_cost = hours_to_charge * price_per_hour
+    
+    reservation.total_cost = total_cost
+    reservation.spot.status = 'A'
+    db.session.commit()
+
+    flash(f'Spot released. You parked for {duration_minutes:.0f} minutes. Total cost: ₹{total_cost:.2f}', 'success')
+    return redirect(url_for('user.user_dashboard'))
+
+@user_bp.route('/user/history')
+def parking_history():
+    if 'user_id' not in session:
+        flash('You must be logged in to view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+
+    # Find all completed reservations for the user, showing the most recent first
+    completed_reservations = Reservation.query.filter(
+        Reservation.user_id == session['user_id'],
+        Reservation.end_time.is_not(None)
+    ).order_by(Reservation.end_time.desc()).all()
+    
+    return render_template('user/history.html', reservations=completed_reservations)

@@ -19,8 +19,10 @@
                 <span class="spot-status">
                     {% if spot.status == 'A' %}
                         Available
-                    {% else %}
+                    {% elif spot.status == 'O' %}
                         Occupied
+                    {% else %}
+                        Reserved
                     {% endif %}
                 </span>
             </div>

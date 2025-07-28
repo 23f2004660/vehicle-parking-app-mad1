@@ -4,6 +4,8 @@ from models.database import db, User
 from routes.auth_routes import auth_bp
 from routes.admin_routes import admin_bp
 from routes.user_routes import user_bp
+from zoneinfo import ZoneInfo
+from datetime import datetime
 
 app = Flask(__name__)
 
@@ -11,6 +13,17 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parking_app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your-super-secret-key'
+
+def to_ist(utc_dt):
+    if utc_dt is None:
+        return ""
+    # Convert naive datetime to UTC-aware datetime
+    utc_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC"))
+    # Convert to India Standard Time
+    return utc_dt.astimezone(ZoneInfo("Asia/Kolkata"))
+
+# Register the function as a filter
+app.jinja_env.filters['to_ist'] = to_ist
 
 # Initialize database
 db.init_app(app)

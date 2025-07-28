@@ -1,0 +1,43 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Your Parking History</h1>
+        <a href="{{ url_for('user.user_dashboard') }}" class="btn btn-outline">&laquo; Back to Dashboard</a>
+    </div>
+    <hr>
+
+    {% if reservations %}
+    <table class="data-table">
+        <thead>
+            <tr>
+                <th>Lot Name</th>
+                <th>Spot #</th>
+                <th>Parked At</th>
+                <th>Released At</th>
+                <th>Duration (Mins)</th>
+                <th>Total Cost</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for res in reservations %}
+            <tr>
+                <td>{{ res.spot.lot.name }}</td>
+                <td>{{ res.spot.spot_number }}</td>
+                <td>{{ (res.start_time | to_ist).strftime('%d-%b %I:%M %p') }}</td>
+                <td>{{ (res.end_time | to_ist).strftime('%d-%b %I:%M %p') }}</td>
+                {# Calculate duration in minutes #}
+                {% set duration = (res.end_time - res.start_time).total_seconds() / 60 %}
+                <td>{{ "%.0f"|format(duration) }}</td>
+                <td>₹{{ "%.2f"|format(res.total_cost) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <div class="card-placeholder">
+        <p>You have no completed parking sessions yet.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

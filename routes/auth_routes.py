@@ -6,7 +6,7 @@ auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/')
 def welcome():
-    return render_template('welcome.html')
+    return render_template('auth/welcome.html')
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
 def login():
@@ -20,6 +20,7 @@ def login():
             session['user_id'] = user.id
             session['user_email'] = user.email
             session['is_admin'] = user.is_admin
+            session['full_name'] = user.full_name
 
             flash('Logged in successfully!', 'success')
             
@@ -33,7 +34,7 @@ def login():
             # CORRECTED: Point to the 'auth' blueprint for login
             return redirect(url_for('auth.login'))
 
-    return render_template('login.html') 
+    return render_template('auth/login.html') 
     
 @auth_bp.route('/register', methods=['GET', 'POST'])
 def register():
@@ -65,7 +66,7 @@ def register():
         # CORRECTED: Point to the 'auth' blueprint for login
         return redirect(url_for('auth.login'))
     
-    return render_template('register.html')
+    return render_template('auth/register.html')
 
 @auth_bp.route('/logout')
 def logout():

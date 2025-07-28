@@ -1,0 +1,72 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Welcome, {{ session.full_name }}!</h1>
+        <a href="{{ url_for('user.parking_history') }}" class="btn btn-outline btn-sm">Parking History</a>
+        <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">Logout</a>
+
+    </div>
+    
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="flash-{{ category }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+
+    <hr>
+
+    {% if active_reservations %}
+    <h2>Your Active Sessions</h2>
+    {% for reservation in active_reservations %}
+        {% if reservation.start_time %}
+            <div class="lot-card active-session mb-3"> <h3>{{ reservation.spot.lot.name }}</h3>
+                <p class="lot-meta">You are parked at Spot #{{ reservation.spot.spot_number }} (Occupied)</p>
+                <div class="lot-details">
+                    <span>Parked at: {{ (reservation.start_time | to_ist).strftime('%d-%b-%Y %I:%M %p') }}</span>
+                </div>
+                <div class="lot-actions">
+                    <form method="POST" action="{{ url_for('user.release_spot', reservation_id=reservation.id) }}">
+                        <button type="submit" class="btn-action btn-delete">Release Spot</button>
+                    </form>
+                </div>
+            </div>
+        {% else %}
+            <div class="lot-card reserved-session mb-3"> <h3>{{ reservation.spot.lot.name }}</h3>
+                <p class="lot-meta">You have reserved Spot #{{ reservation.spot.spot_number }} (Reserved)</p>
+                <div class="lot-details">
+                    <span>Awaiting your arrival.</span>
+                </div>
+                <div class="lot-actions">
+                    <form method="POST" action="{{ url_for('user.occupy_spot', reservation_id=reservation.id) }}">
+                        <button type="submit" class="btn-action btn-book">Occupy Spot</button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+    {% endfor %}
+{% endif %}
+
+    <h2>Available Parking Lots</h2>
+    {% for lot in lots %}
+        {% set available_spots = lot.spots|selectattr('status', 'equalto', 'A')|list|length %}
+        {% if available_spots > 0 %}
+        <div class="lot-card">
+            <h3>{{ lot.name }}</h3>
+            <p class="lot-meta">{{ lot.address }}, {{ lot.pincode }}</p>
+            <div class="lot-details">
+                <span>Available Spots: {{ available_spots }} / {{ lot.capacity }}</span>
+                <span>Price: ₹{{ "%.2f"|format(lot.price_per_hour) }}/hr</span>
+            </div>
+            <div class="lot-actions">
+                <form method="POST" action="{{ url_for('user.book_spot', lot_id=lot.id) }}">
+                    <button type="submit" class="btn-action btn-book">Book a Spot</button>
+                </form>
+            </div>
+        </div>
+        {% endif %}
+    {% endfor %}
+</div>
+{% endblock %}

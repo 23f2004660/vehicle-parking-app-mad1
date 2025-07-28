@@ -14,7 +14,7 @@ def admin_dashboard():
     #get all parking lots
     lots = ParkingLot.query.all()
 
-    return render_template('admin_dashboard.html', lots=lots)
+    return render_template('admin/admin_dashboard.html', lots=lots)
 
 @admin_bp.route('/admin/add_lot', methods=['GET', 'POST'])
 def add_lot_page():
@@ -50,7 +50,7 @@ def add_lot_page():
         return redirect(url_for('admin.admin_dashboard'))
 
     # For a GET request, just show the form
-    return render_template('add_lot.html')
+    return render_template('admin/add_lot.html')
 
 @admin_bp.route('/admin/lot/<int:lot_id>')
 def lot_details(lot_id):
@@ -63,7 +63,7 @@ def lot_details(lot_id):
 
     # The lot's spots are automatically available through the relationship
     # so we can just pass the lot object to the template.
-    return render_template('lot_details.html', lot=lot)
+    return render_template('admin/lot_details.html', lot=lot)
 
 @admin_bp.route('/admin/users')
 def view_users():
@@ -74,7 +74,7 @@ def view_users():
     # Query all users who are NOT admins
     users = User.query.filter_by(is_admin=False).all()
     
-    return render_template('view_users.html', users=users)
+    return render_template('admin/view_users.html', users=users)
 
 # In routes/admin_routes.py
 
@@ -147,4 +147,4 @@ def edit_lot(lot_id):
         flash(f'Successfully updated parking lot "{lot_to_edit.name}".', 'success')
         return redirect(url_for('admin.admin_dashboard'))
 
-    return render_template('edit_lot.html', lot=lot_to_edit)
+    return render_template('admin/edit_lot.html', lot=lot_to_edit)
