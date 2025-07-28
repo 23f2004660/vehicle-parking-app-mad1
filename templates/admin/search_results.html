@@ -1,0 +1,57 @@
+{% extends "layout.html" %}
+{% block content %}
+<div class="dashboard-container">
+    <div class="dashboard-header">
+        <h1>Search Results for "{{ query }}"</h1>
+        <a href="{{ url_for('admin.admin_dashboard') }}" class="btn btn-outline">&laquo; Back to Dashboard</a>
+    </div>
+    <hr>
+
+    <h2>Matching Parking Lots ({{ lots|length }})</h2>
+    {% if lots %}
+        <div class="lot-list">
+        {% for lot in lots %}
+            <div class="lot-card">
+                <h3>{{ lot.name }}</h3>
+                <p class="lot-meta">{{ lot.address }}, {{ lot.pincode }}</p>
+                <div class="lot-details">
+                    <span>Capacity: {{ lot.capacity }} spots</span>
+                    <span>Price: ₹{{ "%.2f"|format(lot.price_per_hour) }}/hr</span>
+                </div>
+                <div class="lot-actions">
+                    <a href="{{ url_for('admin.edit_lot', lot_id=lot.id) }}" class="btn-action btn-edit">Edit</a>
+                </div>
+            </div>
+        {% endfor %}
+        </div>
+    {% else %}
+        <p>No parking lots found matching your query.</p>
+    {% endif %}
+    
+    <hr>
+
+    <h2>Matching Users ({{ users|length }})</h2>
+    {% if users %}
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Full Name</th>
+                    <th>Email</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                <tr>
+                    <td>{{ user.id }}</td>
+                    <td>{{ user.full_name }}</td>
+                    <td>{{ user.email }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No users found matching your query.</p>
+    {% endif %}
+</div>
+{% endblock %}

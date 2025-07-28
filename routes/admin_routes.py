@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, request, redirect, url_for, flash, session
 from models.database import User, db, ParkingLot, ParkingSpot
-
+from sqlalchemy import or_
 # Create a blueprint for admin routes
 admin_bp = Blueprint('admin', __name__)
 
@@ -148,3 +148,38 @@ def edit_lot(lot_id):
         return redirect(url_for('admin.admin_dashboard'))
 
     return render_template('admin/edit_lot.html', lot=lot_to_edit)
+
+@admin_bp.route('/admin/search')
+def search():
+    if not session.get('is_admin'):
+        flash('You must be an admin to view this page.', 'danger')
+        return redirect(url_for('auth.login'))
+    
+    query = request.args.get('q', '')
+    found_lots = []
+    found_users = []
+
+    if query:
+        search_term = f"%{query}%" # Prepare the term for a 'like' search
+        
+        # Search ParkingLots by name, address, or pincode
+        found_lots = ParkingLot.query.filter(
+            or_(
+                ParkingLot.name.ilike(search_term),
+                ParkingLot.address.ilike(search_term),
+                ParkingLot.pincode.ilike(search_term)
+            )
+        ).all()
+
+        # Search Users by full_name or email
+        found_users = User.query.filter_by(is_admin=False).filter(
+            or_(
+                User.full_name.ilike(search_term),
+                User.email.ilike(search_term)
+            )
+        ).all()
+
+    return render_template('admin/search_results.html', 
+                           query=query, 
+                           lots=found_lots, 
+                           users=found_users)
