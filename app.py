@@ -1,6 +1,5 @@
 from flask import Flask
 from models.database import db, User
-# Import both blueprints
 from routes.auth_routes import auth_bp
 from routes.admin_routes import admin_bp
 from routes.user_routes import user_bp
@@ -15,15 +14,14 @@ app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///parking_app.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'your-super-secret-key'
 
-def to_ist(utc_dt):
+def to_ist(utc_dt): #function to convert utc to ist
     if utc_dt is None:
         return ""
-    # Convert naive datetime to UTC-aware datetime
+    # make the utc default time to indian time
     utc_dt = utc_dt.replace(tzinfo=ZoneInfo("UTC"))
-    # Convert to India Standard Time
     return utc_dt.astimezone(ZoneInfo("Asia/Kolkata"))
 
-# Register the function as a filter
+# this will make it a function in the jinja template
 app.jinja_env.filters['to_ist'] = to_ist
 
 # Initialize database
@@ -34,21 +32,20 @@ app.register_blueprint(auth_bp)
 app.register_blueprint(admin_bp)
 app.register_blueprint(user_bp)
 
-# --- Helper Functions ---
+# this will create the admin user and the database since its written in the project statement
 def create_admin_and_db():
     """Initializes the database and creates the default admin user."""
     with app.app_context():
         db.create_all()
-        # FIX: Query by email instead of username
+       
         admin = User.query.filter_by(email='admin@parkarage.com').first()
         if not admin:
             print("Creating admin user...")
-            admin_user = User(
-                # FIX: Use the email field
+            admin_user = User(                
                 email='admin@parkarage.com', 
                 full_name='Admin User',
                 is_admin=True,
-                # Admin doesn't need a real address, so we use placeholders
+                # we havent given admin any address so just using placeholder
                 address='N/A', 
                 pincode='000000'
             )

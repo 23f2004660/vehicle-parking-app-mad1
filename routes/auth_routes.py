@@ -24,14 +24,14 @@ def login():
 
             flash('Logged in successfully!', 'success')
             
-            # CORRECTED: Point to the 'admin' and 'user' blueprints
+            # if user is admin then go to admin dashboard else go to user dashboard
             if user.is_admin:
                 return redirect(url_for('admin.admin_dashboard'))
             else:
                 return redirect(url_for('user.user_dashboard'))
         else:
             flash('Invalid email or password. Please try again.', 'danger')
-            # CORRECTED: Point to the 'auth' blueprint for login
+            # if user puts wrong credentials then go to login page again
             return redirect(url_for('auth.login'))
 
     return render_template('auth/login.html') 
@@ -48,7 +48,6 @@ def register():
         existing_user = User.query.filter_by(email=email).first()
         if existing_user:
             flash('Email address already exists. Please use a different one.', 'danger')
-            # CORRECTED: Point to the 'auth' blueprint for register
             return redirect(url_for('auth.register'))
 
         new_user = User(
@@ -63,7 +62,6 @@ def register():
         db.session.commit()
 
         flash('Registration successful! Please log in.', 'success')
-        # CORRECTED: Point to the 'auth' blueprint for login
         return redirect(url_for('auth.login'))
     
     return render_template('auth/register.html')
@@ -72,5 +70,5 @@ def register():
 def logout():
     session.clear()
     flash('You have been logged out.', 'success')
-    # CORRECTED: Point to the 'auth' blueprint for login
+    # if user logs out then go to login page
     return redirect(url_for('auth.login'))

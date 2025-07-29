@@ -13,16 +13,12 @@ def user_dashboard():
         flash('You must be logged in to view this page.', 'danger')
         return redirect(url_for('auth.login'))
     
-    # Let's print the session user ID to be sure it's correct
-    print(f"--- DEBUG: Checking for reservations for user_id: {session.get('user_id')} ---")
 
     active_reservations = Reservation.query.filter(
         Reservation.user_id == session['user_id'], 
-        Reservation.end_time.is_(None)
+        Reservation.end_time.is_(None) #because if endtime is not none then the reservation is over
     ).all()
     
-    # Let's print what the database query found
-    print(f"--- DEBUG: Query found these reservations: {active_reservations} ---")
 
     lots = ParkingLot.query.all()
     
@@ -34,13 +30,11 @@ def book_spot(lot_id):
     if 'user_id' not in session:
         return redirect(url_for('auth.login'))
 
-    available_spot = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').first()
+    available_spot = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').first() #this finds the first available spot in the lot
 
     if available_spot:
-        # Change spot status to Reserved
         available_spot.status = 'R'
         
-        # Create reservation record WITHOUT a start_time
         new_reservation = Reservation(
             user_id=session['user_id'],
             spot_id=available_spot.id
@@ -79,14 +73,12 @@ def release_spot(reservation_id):
     if reservation.user_id != session['user_id'] or reservation.start_time is None:
         return redirect(url_for('user.user_dashboard'))
 
-    # --- New Tiered Calculation Logic ---
+    
     reservation.end_time = datetime.utcnow()
     duration_minutes = (reservation.end_time - reservation.start_time).total_seconds() / 60
     
-    # If parked for 30 mins or less, charge for 30 mins.
     if duration_minutes <= 30:
         blocks_to_charge = 1
-    # Otherwise, round up to the next 30-min block
     else:
         blocks_to_charge = math.ceil(duration_minutes / 30)
 
@@ -107,7 +99,7 @@ def parking_history():
         flash('You must be logged in to view this page.', 'danger')
         return redirect(url_for('auth.login'))
 
-    # Find all completed reservations for the user, showing the most recent first
+    # all completed reservations for the user
     completed_reservations = Reservation.query.filter(
         Reservation.user_id == session['user_id'],
         Reservation.end_time.is_not(None)

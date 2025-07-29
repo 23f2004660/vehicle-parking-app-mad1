@@ -3,20 +3,19 @@ from models.database import User, db, ParkingLot, ParkingSpot, Reservation
 from sqlalchemy import or_
 from sqlalchemy import func
 from sqlalchemy.orm import joinedload
-# Create a blueprint for admin routes
+
 admin_bp = Blueprint('admin', __name__)
 
 @admin_bp.route('/admin/dashboard')
 def admin_dashboard():
-    # Protect this route: only admins should see it
     if not session.get('is_admin'):
         flash('You must be an admin to view this page.', 'danger')
         return redirect(url_for('auth.login'))
     
-    #get all parking lots
     lots = ParkingLot.query.all()
 
     return render_template('admin/admin_dashboard.html', lots=lots)
+
 
 @admin_bp.route('/admin/add_lot', methods=['GET', 'POST'])
 def add_lot_page():
@@ -31,7 +30,7 @@ def add_lot_page():
         capacity = int(request.form['capacity'])
         price_per_hour = float(request.form['price_per_hour'])
 
-        # Create the new ParkingLot object in the database
+        # after getting the data from the form, we create a new parking lot in the database
         new_lot = ParkingLot(
             name=name,
             address=address,
@@ -41,7 +40,7 @@ def add_lot_page():
         )
 
        
-        for i in range(1, capacity + 1):
+        for i in range(1, capacity + 1): #this creates the parking spots for the new lot
             spot = ParkingSpot(spot_number=i, status='A')
             new_lot.spots.append(spot)
         
@@ -51,7 +50,6 @@ def add_lot_page():
         flash(f'Parking lot "{name}" created successfully with {capacity} spots.', 'success')
         return redirect(url_for('admin.admin_dashboard'))
 
-    # For a GET request, just show the form
     return render_template('admin/add_lot.html')
 
 @admin_bp.route('/admin/lot/<int:lot_id>')
@@ -60,7 +58,6 @@ def lot_details(lot_id):
         flash('You must be an admin to view this page.', 'danger')
         return redirect(url_for('auth.login'))
 
-    # This new query uses "eager loading" to reliably fetch all related data
     lot = ParkingLot.query.options(
         joinedload(ParkingLot.spots).subqueryload(ParkingSpot.reservations)
     ).get(lot_id)
@@ -76,12 +73,10 @@ def view_users():
         flash('You must be an admin to view this page.', 'danger')
         return redirect(url_for('auth.login'))
 
-    # Query all users who are NOT admins
+    # get all users but not admins
     users = User.query.filter_by(is_admin=False).all()
     
     return render_template('admin/view_users.html', users=users)
-
-# In routes/admin_routes.py
 
 @admin_bp.route('/admin/lot/delete/<int:lot_id>', methods=['POST'])
 def delete_lot(lot_id):
@@ -90,21 +85,17 @@ def delete_lot(lot_id):
 
     lot_to_delete = ParkingLot.query.get_or_404(lot_id)
 
-    # Check if any spot in the lot is occupied
+    # check if any spot in the lot is occupied
     occupied_spots = any(spot.status == 'O' for spot in lot_to_delete.spots)
     if occupied_spots:
         flash('Cannot delete a lot with occupied spots. Please wait until it is empty.', 'danger')
         return redirect(url_for('admin.admin_dashboard'))
-
-    # If all spots are available, proceed with deletion
+    #if spots are free then we can delte
     db.session.delete(lot_to_delete)
     db.session.commit()
     flash(f'Parking lot "{lot_to_delete.name}" has been deleted.', 'success')
     return redirect(url_for('admin.admin_dashboard'))
 
-# In routes/admin_routes.py
-
-# In routes/admin_routes.py
 
 @admin_bp.route('/admin/lot/edit/<int:lot_id>', methods=['GET', 'POST'])
 def edit_lot(lot_id):
@@ -114,36 +105,31 @@ def edit_lot(lot_id):
     lot_to_edit = ParkingLot.query.get_or_404(lot_id)
 
     if request.method == 'POST':
-        # Update the simple fields first
+        # update fields
         lot_to_edit.name = request.form['name']
         lot_to_edit.address = request.form['address']
         lot_to_edit.pincode = request.form['pincode']
         lot_to_edit.price_per_hour = float(request.form['price_per_hour'])
 
-        # --- Logic for Changing Capacity ---
         new_capacity = int(request.form['capacity'])
         current_capacity = lot_to_edit.capacity
 
-        if new_capacity > current_capacity:
-            # INCREASE: Add new spots
+        if new_capacity > current_capacity: #if new capacity is greater than current capacity then we add new spots
             for i in range(current_capacity + 1, new_capacity + 1):
                 new_spot = ParkingSpot(spot_number=i, status='A')
                 lot_to_edit.spots.append(new_spot)
             lot_to_edit.capacity = new_capacity
 
-        elif new_capacity < current_capacity:
-            # DECREASE: Remove spots, but only if they are available
+        elif new_capacity < current_capacity: #if new is less than current then we remove spots
             spots_to_remove_count = current_capacity - new_capacity
             
-            # Find available spots to delete, starting from the highest number
+            # delete spots from the highest number if they available
             available_spots_to_delete = ParkingSpot.query.filter_by(lot_id=lot_id, status='A').order_by(ParkingSpot.spot_number.desc()).limit(spots_to_remove_count).all()
 
             if len(available_spots_to_delete) < spots_to_remove_count:
-                # Not enough available spots to delete
                 flash('Cannot decrease capacity by that much, too many spots are occupied.', 'danger')
                 return redirect(url_for('admin.edit_lot', lot_id=lot_id))
             else:
-                # Proceed with deletion
                 for spot in available_spots_to_delete:
                     db.session.delete(spot)
                 lot_to_edit.capacity = new_capacity
@@ -196,7 +182,7 @@ def summary_page():
         flash('You must be an admin to view this page.', 'danger')
         return redirect(url_for('auth.login'))
 
-    # --- Data for Parking Lots Summary Tab ---
+    # parking lot summary
     lots = ParkingLot.query.order_by(ParkingLot.name).all()
     lot_names = [lot.name for lot in lots]
     lot_capacities = [lot.capacity for lot in lots]
@@ -205,10 +191,10 @@ def summary_page():
     occupied_spots = ParkingSpot.query.filter_by(status='O').count()
     reserved_spots = ParkingSpot.query.filter_by(status='R').count()
 
-    # --- Data for Revenue Summary Tab ---
+    # revenue summary
     revenue_per_lot = []
     for lot in lots:
-        # Sum the total_cost for all completed reservations for this specific lot
+        # sum the total_cost for all completed reservations for this specific lot
         total = db.session.query(func.sum(Reservation.total_cost)).join(ParkingSpot).filter(
             ParkingSpot.lot_id == lot.id,
             Reservation.end_time.is_not(None)
@@ -226,15 +212,12 @@ def summary_page():
                            revenue_per_lot=revenue_per_lot,
                            total_revenue=total_revenue)
 
-# In routes/admin_routes.py
-
 @admin_bp.route('/admin/records')
 def all_records():
     if not session.get('is_admin'):
         flash('You must be an admin to view this page.', 'danger')
         return redirect(url_for('auth.login'))
 
-    # Fetch all reservations that have an end_time, newest first
     all_reservations = Reservation.query.filter(
         Reservation.end_time.is_not(None)
     ).order_by(Reservation.end_time.desc()).all()
